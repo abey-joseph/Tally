@@ -32,23 +32,23 @@ Allow about 15 minutes.
    cp .env.example .env.local
    ```
 
-   | `.env.local` key                    | From `firebaseConfig`                           |
-   | ----------------------------------- | ----------------------------------------------- |
-   | `VITE_FIREBASE_API_KEY`             | `apiKey`                                        |
-   | `VITE_FIREBASE_AUTH_DOMAIN`         | **`<project-id>.web.app`** (see the note below) |
-   | `VITE_FIREBASE_PROJECT_ID`          | `projectId`                                     |
-   | `VITE_FIREBASE_STORAGE_BUCKET`      | `storageBucket`                                 |
-   | `VITE_FIREBASE_MESSAGING_SENDER_ID` | `messagingSenderId`                             |
-   | `VITE_FIREBASE_APP_ID`              | `appId`                                         |
+   | `.env.local` key                    | From `firebaseConfig`                         |
+   | ----------------------------------- | --------------------------------------------- |
+   | `VITE_FIREBASE_API_KEY`             | `apiKey`                                      |
+   | `VITE_FIREBASE_AUTH_DOMAIN`         | `authDomain` (`<project-id>.firebaseapp.com`) |
+   | `VITE_FIREBASE_PROJECT_ID`          | `projectId`                                   |
+   | `VITE_FIREBASE_STORAGE_BUCKET`      | `storageBucket`                               |
+   | `VITE_FIREBASE_MESSAGING_SENDER_ID` | `messagingSenderId`                           |
+   | `VITE_FIREBASE_APP_ID`              | `appId`                                       |
 
-> **Why `web.app` for the auth domain?** Safari on iPhone blocks the cross-site storage that
-> Google sign-in needs when the sign-in page is on a different domain from the app. If you
-> set the auth domain to the same domain the app is hosted on, sign-in also works from the
-> home-screen app. For local development, `<project-id>.firebaseapp.com` is fine too.
+> **Sign-in domain on iPhone:** Safari blocks the cross-site storage Google sign-in needs
+> when the sign-in page is on a different domain from the app. The deployed app therefore
+> signs in through its own domain (`<project-id>.web.app`) automatically, whatever
+> `.env.local` says. `.env.local`'s value (`firebaseapp.com`) is only used on localhost.
 
 ## 5. Allow the redirect URL for the web.app auth domain
 
-The `web.app` auth domain needs one extra setting in Google Cloud:
+The deployed app signs in through `<project-id>.web.app`, which needs one extra setting in Google Cloud:
 
 1. Open <https://console.cloud.google.com/apis/credentials> with the same project selected.
 2. Under **OAuth 2.0 Client IDs**, open **Web client (auto created by Google Service)**.
@@ -74,7 +74,7 @@ npm install -g firebase-tools        # once
 firebase login
 ```
 
-Replace `your-firebase-project-id` in `.firebaserc` with your project ID. Then:
+`.firebaserc` already points at `tally-habits` (change it if you use a different project). Then:
 
 ```bash
 npm run rules                        # generates firestore.rules

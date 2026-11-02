@@ -21,9 +21,19 @@ import {
 
 const env = import.meta.env;
 
+/**
+ * When served from Firebase Hosting (*.web.app / *.firebaseapp.com), sign in through the
+ * app's own domain: Safari on iPhone blocks the cross-site storage that a different auth
+ * domain would need. Elsewhere (localhost) use the configured auth domain.
+ */
+const host = typeof window === 'undefined' ? '' : window.location.hostname;
+const authDomain = /\.(web\.app|firebaseapp\.com)$/.test(host)
+  ? host
+  : env.VITE_FIREBASE_AUTH_DOMAIN;
+
 const config = {
   apiKey: env.VITE_FIREBASE_API_KEY,
-  authDomain: env.VITE_FIREBASE_AUTH_DOMAIN,
+  authDomain,
   projectId: env.VITE_FIREBASE_PROJECT_ID,
   storageBucket: env.VITE_FIREBASE_STORAGE_BUCKET,
   messagingSenderId: env.VITE_FIREBASE_MESSAGING_SENDER_ID,
