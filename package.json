@@ -12,11 +12,14 @@
     "format:check": "prettier --check .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "typecheck": "tsc -b"
+    "typecheck": "tsc -b",
+    "rules": "node scripts/generate-rules.mjs",
+    "deploy": "npm run rules && npm run build && firebase deploy --only hosting,firestore:rules"
   },
   "dependencies": {
     "date-fns": "^4.4.0",
     "date-fns-tz": "^3.2.0",
+    "firebase": "^13.1.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^7.18.5"

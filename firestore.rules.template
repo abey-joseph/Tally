@@ -1,0 +1,25 @@
+rules_version = '2';
+
+// Tally — Firestore security rules.
+// Generated into `firestore.rules` by `npm run rules`, which fills in
+// __ALLOWED_EMAIL__ from VITE_ALLOWED_EMAIL in .env.local. Edit THIS file, not firestore.rules.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Signed in, with a verified Google email that is the one allowed address,
+    // and only ever touching their own users/{uid} tree.
+    function isOwner(uid) {
+      return request.auth != null
+        && request.auth.uid == uid
+        && request.auth.token.email_verified == true
+        && request.auth.token.email.lower() == '__ALLOWED_EMAIL__';
+    }
+
+    // users/{uid} itself plus every subcollection (habits, entries).
+    match /users/{uid}/{document=**} {
+      allow read, write: if isOwner(uid);
+    }
+
+    // Everything else is denied by default.
+  }
+}

@@ -40,9 +40,30 @@ export default defineConfig({
         // Cache the app shell; Firestore handles its own offline data.
         globPatterns: ['**/*.{js,css,html,svg,png,ico,webmanifest}'],
         navigateFallback: '/index.html',
+        // Firebase Auth's sign-in handler lives under /__/ and must never be served from cache.
+        navigateFallbackDenylist: [/^\/__\//],
       },
     }),
   ],
+  build: {
+    rollupOptions: {
+      output: {
+        // Separate long-lived vendor chunks so app updates don't re-download Firebase/React.
+        manualChunks(id: string) {
+          if (!id.includes('node_modules')) return undefined;
+          if (/[\\/]node_modules[\\/](@firebase|firebase|re2js|idb)[\\/]/.test(id))
+            return 'firebase';
+          if (
+            /[\\/]node_modules[\\/](react|react-dom|react-router|react-router-dom|scheduler)[\\/]/.test(
+              id,
+            )
+          )
+            return 'react';
+          return 'vendor';
+        },
+      },
+    },
+  },
   test: {
     include: ['src/**/*.test.ts'],
     environment: 'node',

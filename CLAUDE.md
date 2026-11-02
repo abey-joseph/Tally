@@ -253,6 +253,12 @@ Charts are SVG, use the habit colour, and work at 360px width.
 - Core logic lives in `src/lib/` (pure, no React/Firebase): `dates`, `frequency`, `status` (timeline, 5.1 + 5.3), `score` (5.2), `streaks` (5.4), `stats` (5.5, plus `analyzeHabit`).
 - Dates are handled as `YYYY-MM-DD` strings / UTC day numbers; only `todayIn(timezone)` touches a real time zone.
 
+- Firebase: `src/firebase/config.ts` (init from env, offline cache, emulators in dev only), `src/firebase/auth.ts` (popup, or redirect in the installed app).
+- Data: `src/data/DataProvider.tsx` holds three live listeners (user doc, habits, entries) plus write actions (`useData()`). Writes are never awaited; Firestore's local cache makes them instant and they sync later. `src/data/model.ts` validates every document read.
+- Auth gate: `src/auth/AuthGate.tsx` shows the loading, sign-in, No access or app screen. The data listeners only start for the allowed user.
+- Rules: edit `firestore.rules.template`. `npm run rules` writes the git-ignored `firestore.rules` with the email from `.env.local`.
+- Emulator testing: `VITE_USE_EMULATORS=true` (dev server only) exposes `window.__tallyEmulatorSignIn(email, verified?)` because Google's popup script can't load in sandboxes.
+
 ### Logic decisions (agreed interpretations of the spec)
 
 - **Today, not yet entered** = status `missed` with `pending: true`. It does not lower the score or break the current streak until the day is over (the UI should show it as empty, not ✕).

@@ -37,10 +37,19 @@ npm run dev
 | `npm run format`       | Prettier (write)                |
 | `npm run format:check` | Prettier (check only)           |
 | `npm test`             | Run unit tests once (Vitest)    |
+| `npm run rules`        | Generate `firestore.rules`      |
+| `npm run deploy`       | Rules + build + Firebase deploy |
 
 ## Firebase setup
 
-_Coming in Stage 3 — see `scripts/setup.md`._
+Follow [`scripts/setup.md`](scripts/setup.md) (about 15 minutes, free Spark plan). In short:
+create the project, enable Google sign-in, create Firestore in `asia-southeast1`, copy the web
+config and your allowed email into `.env.local`, then `npm run rules` and
+`firebase deploy --only firestore:rules`.
+
+Security: only the single email in `VITE_ALLOWED_EMAIL` can use the app. The UI shows anyone
+else a "No access" screen, and the Firestore rules (generated from `firestore.rules.template`)
+refuse their reads and writes.
 
 ## Deploy
 
