@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import WriteErrorToast from '../components/WriteErrorToast';
 import { DataProvider, useData } from '../data/DataProvider';
+import { useTheme } from '../theme';
 import { useAuth } from './AuthProvider';
 import { ErrorScreen, LoadingScreen, NoAccessScreen, SignInScreen } from './screens';
 
@@ -24,7 +25,8 @@ export default function AuthGate({ children }: { children: ReactNode }) {
 }
 
 function DataReady({ children }: { children: ReactNode }) {
-  const { loading, error } = useData();
+  const { loading, error, settings } = useData();
+  useTheme(settings.theme, settings.pureBlack);
   if (error) return <ErrorScreen message={error} />;
   if (loading) return <LoadingScreen label="Loading your habits…" />;
   return (

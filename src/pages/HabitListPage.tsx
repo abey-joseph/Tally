@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import HabitRow from '../components/HabitRow';
 import Menu from '../components/Menu';
 import NumberSheet from '../components/NumberSheet';
+import ReorderList from '../components/ReorderList';
 import {
   ArchiveIcon,
   CloudOffIcon,
@@ -28,9 +29,10 @@ const SORT_OPTIONS: { value: SortBy; label: string }[] = [
 
 export default function HabitListPage() {
   const data = useData();
-  const { habits, settings, today, entriesFor, setEntry, updateSettings } = data;
+  const { habits, settings, today, entriesFor, setEntry, updateSettings, reorderHabits } = data;
   const [params, setParams] = useSearchParams();
   const showArchived = params.get('archived') === '1';
+  const reordering = params.get('reorder') === '1';
   const [sheet, setSheet] = useState<{ habit: Habit; date: DateStr } | null>(null);
 
   // Columns: the last `daysShown` days; newest on the left when `newestFirst` (like Loop).
@@ -68,35 +70,61 @@ export default function HabitListPage() {
   return (
     <div className="mx-auto w-full max-w-[720px]">
       <header className="sticky top-0 z-30 bg-white/95 backdrop-blur dark:bg-neutral-900/95 [html.black_&]:bg-black/95">
-        <div className="flex h-14 items-center gap-1 px-2 pl-4">
-          <h1 className="text-xl font-semibold">Tally</h1>
-          <SyncStatus online={data.online} syncing={data.hasPendingWrites} />
-          <span className="flex-1" />
-          <Menu
-            label="Sort habits"
-            icon={<SortIcon size={22} />}
-            value={settings.sortBy}
-            options={SORT_OPTIONS}
-            onChange={(sortBy) => updateSettings({ sortBy })}
-          />
-          <button
-            type="button"
-            aria-label={showArchived ? 'Hide archived habits' : 'Show archived habits'}
-            aria-pressed={showArchived}
-            onClick={() => setParams(showArchived ? {} : { archived: '1' }, { replace: true })}
-            className={`icon-btn ${showArchived ? 'bg-neutral-200 dark:bg-neutral-700' : ''}`}
-          >
-            <ArchiveIcon size={22} />
-          </button>
-          <Link to="/habit/new" aria-label="Add habit" className="icon-btn">
-            <PlusIcon size={24} />
-          </Link>
-          <Link to="/settings" aria-label="Settings" className="icon-btn">
-            <SettingsIcon size={22} />
-          </Link>
-        </div>
+        {reordering ? (
+          <div className="flex h-14 items-center gap-1 px-2 pl-4">
+            <h1 className="flex-1 text-xl font-semibold">Reorder habits</h1>
+            <button
+              type="button"
+              onClick={() => setParams({}, { replace: true })}
+              className="min-h-11 rounded-full bg-neutral-900 px-5 font-semibold text-white dark:bg-neutral-100 dark:text-neutral-900"
+            >
+              Done
+            </button>
+          </div>
+        ) : (
+          <div className="flex h-14 items-center gap-1 px-2 pl-4">
+            <h1 className="text-xl font-semibold">Tally</h1>
+            <SyncStatus online={data.online} syncing={data.hasPendingWrites} />
+            <span className="flex-1" />
+            <Menu
+              label="Sort habits"
+              icon={<SortIcon size={22} />}
+              value={settings.sortBy}
+              options={SORT_OPTIONS}
+              onChange={(sortBy) => updateSettings({ sortBy })}
+              actions={
+                habits.some((h) => !h.archived)
+                  ? [
+                      {
+                        label: 'Reorder…',
+                        onSelect: () => {
+                          if (settings.sortBy !== 'manual') updateSettings({ sortBy: 'manual' });
+                          setParams({ reorder: '1' }, { replace: true });
+                        },
+                      },
+                    ]
+                  : undefined
+              }
+            />
+            <button
+              type="button"
+              aria-label={showArchived ? 'Hide archived habits' : 'Show archived habits'}
+              aria-pressed={showArchived}
+              onClick={() => setParams(showArchived ? {} : { archived: '1' }, { replace: true })}
+              className={`icon-btn ${showArchived ? 'bg-neutral-200 dark:bg-neutral-700' : ''}`}
+            >
+              <ArchiveIcon size={22} />
+            </button>
+            <Link to="/habit/new" aria-label="Add habit" className="icon-btn">
+              <PlusIcon size={24} />
+            </Link>
+            <Link to="/settings" aria-label="Settings" className="icon-btn">
+              <SettingsIcon size={22} />
+            </Link>
+          </div>
+        )}
 
-        {visible.length > 0 && (
+        {visible.length > 0 && !reordering && (
           <div className="flex items-end border-b border-neutral-200 px-2 pb-1 dark:border-neutral-800">
             <span className="flex-1" />
             {dates.map((d) => (
@@ -113,7 +141,16 @@ export default function HabitListPage() {
       </header>
 
       <main className="px-2 pb-24">
-        {visible.length === 0 ? (
+        {reordering ? (
+          <ReorderList
+            habits={sortHabits(
+              habits.filter((h) => !h.archived),
+              'manual',
+              new Map(),
+            )}
+            onSave={reorderHabits}
+          />
+        ) : visible.length === 0 ? (
           <div className="px-6 py-20 text-center text-neutral-500 dark:text-neutral-400">
             <p>
               {archivedCount > 0 && !showArchived

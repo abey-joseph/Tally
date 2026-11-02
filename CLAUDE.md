@@ -262,6 +262,9 @@ Charts are SVG, use the habit colour, and work at 360px width.
 - Main list: `src/pages/HabitListPage.tsx` → `HabitRow` → `DayBox` / `ScoreRing`; numeric entry via `NumberSheet`. Pure UI helpers in `src/lib/` (`colors`, `cycle`, `format`, `sort`, `describe`).
 - Create/edit: `src/pages/HabitEditPage.tsx`; form state + validation in `src/lib/habitForm.ts` (tested). Shared `AppBar`, `ConfirmDialog`, `useGoBack`; CSS utilities `card`, `input`, `icon-btn` in index.css.
 - Detail: `src/pages/HabitDetailPage.tsx` with cards in `src/components/detail/` (Overview, ScoreChart, HistoryChart, CalendarCard, StreaksCard, FrequencyCard). Chart data shaping in `src/lib/charts.ts` (tested). Charts are hand-built SVG, scroll horizontally and open on the newest data. The calendar is a grid of buttons (40px cells) for accessibility.
+- Settings: `src/pages/SettingsPage.tsx`. Theme: `src/theme.ts` (`useTheme`, called in AuthGate) plus an inline script in `index.html` that applies the cached theme before first paint.
+- Export/import: `src/lib/backup.ts` (CSV, JSON backup v1, `parseBackup`, `planImport` dry run, `importWrites`), tested including a full round trip. Files are saved via `src/lib/download.ts` (share sheet on iPhone, download elsewhere). `DataProvider.importData` writes in batches.
+- Reorder: "Reorder…" in the sort menu → `?reorder=1` → `src/components/ReorderList.tsx` (drag handle with `touch-action: none`, plus up/down buttons).
 - Habit colour in the UI: set `--habit` on a container and use `.habit-fg` / `.habit-tint` (index.css). Dark mode lightens colours automatically; palette colours all have ≥ 3:1 contrast on white.
 - E2E testing recipe: emulators + dev server with `VITE_USE_EMULATORS=true`, seed via the Firestore emulator REST API with `Authorization: Bearer owner`.
 
@@ -279,5 +282,9 @@ Charts are SVG, use the habit colour, and work at 360px width.
 - **Start date** can be backdated but not set in the future. Target 0 is allowed only for "at most".
 - **Score chart** points = score on the last day of each day/week/month/quarter/year (default zoom: week). **History** default zoom: week.
 - **Calendar cells** differ by pattern, not only colour: done = solid, target met = tint, skipped = stripes, not done = grey, today-pending = dashed outline.
+- **Import never overwrites without confirmation**: new habits/entries are added; entries or habits that differ are only replaced if "Replace my current data…" is ticked. Settings are only restored if ticked. The preview recalculates live, so it stays accurate if data syncs in.
+- **CSV** has rows only for days with a value or note (not every empty day); values are `yes`/`no`/`skipped`/number. JSON backups list dates in order (deterministic files).
+- **Reorder** is a separate mode (from the sort menu) rather than dragging rows on the main list, so drags never fight with scrolling on iPhone. Choosing it switches sorting to manual.
+- Week start options in the UI: Monday, Sunday, Saturday.
 - Habit names are in normal text colour (for contrast); the habit colour is on the ring, ticks and met-target pills.
 - `weekStart` is stored as a JS weekday number (0 = Sunday, 1 = Monday). Settings gained `pureBlack` and `newestFirst`.

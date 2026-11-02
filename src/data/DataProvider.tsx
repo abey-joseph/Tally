@@ -38,6 +38,7 @@ import {
   parseSettings,
   type HabitEntries,
 } from './model';
+import type { ImportWrites } from '../lib/backup';
 import { useToday } from './useToday';
 
 export type NewHabit = Omit<Habit, 'id' | 'order' | 'createdAt'>;
@@ -72,6 +73,8 @@ export interface DataContextValue {
   deleteHabit: (id: string) => void;
   reorderHabits: (orderedIds: string[]) => void;
   updateSettings: (patch: Partial<Settings>) => void;
+  /** Applies a planned import (see lib/backup). Resolves once written locally; syncs in the background. */
+  importData: (writes: ImportWrites) => Promise<void>;
 }
 
 const DataContext = createContext<DataContextValue | null>(null);
@@ -258,6 +261,31 @@ export function DataProvider({ uid, children }: { uid: string; children: ReactNo
     [r, fire],
   );
 
+  const importData = useCallback<DataContextValue['importData']>(
+    async (w) => {
+      // Batches are limited to 500 operations; stay well under.
+      const ops: ((b: ReturnType<typeof writeBatch>) => void)[] = [];
+      for (const h of w.habits) ops.push((b) => b.set(r.habit(h.id), habitToDoc(h)));
+      for (const d of w.entryDocs) {
+        ops.push((b) =>
+          b.set(
+            r.entryDoc(`${d.habitId}_${d.year}`),
+            { habitId: d.habitId, year: d.year, values: d.values, notes: d.notes },
+            { merge: true },
+          ),
+        );
+      }
+      if (w.settings) ops.push((b) => b.set(r.user, { settings: w.settings }, { merge: true }));
+      for (let i = 0; i < ops.length; i += 400) {
+        const batch = writeBatch(db);
+        ops.slice(i, i + 400).forEach((op) => op(batch));
+        // Not awaited: offline, commit() only resolves once the server confirms.
+        fire('import', batch.commit());
+      }
+    },
+    [db, r, fire],
+  );
+
   const entriesFor = useCallback((habitId: string) => entries.get(habitId) ?? EMPTY, [entries]);
 
   const value = useMemo<DataContextValue>(
@@ -279,6 +307,7 @@ export function DataProvider({ uid, children }: { uid: string; children: ReactNo
       deleteHabit,
       reorderHabits,
       updateSettings,
+      importData,
     }),
     [
       uid,
@@ -297,6 +326,7 @@ export function DataProvider({ uid, children }: { uid: string; children: ReactNo
       deleteHabit,
       reorderHabits,
       updateSettings,
+      importData,
     ],
   );
 

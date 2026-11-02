@@ -6,6 +6,8 @@ interface MenuProps<T extends string> {
   value: T;
   options: { value: T; label: string }[];
   onChange: (value: T) => void;
+  /** Extra plain actions shown under the choices (e.g. "Reorder…"). */
+  actions?: { label: string; onSelect: () => void }[];
 }
 
 /** Small single-choice dropdown menu (used for sorting). */
@@ -15,6 +17,7 @@ export default function Menu<T extends string>({
   value,
   options,
   onChange,
+  actions,
 }: MenuProps<T>) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -68,6 +71,20 @@ export default function Menu<T extends string>({
             >
               {o.label}
               {o.value === value && <span aria-hidden>✓</span>}
+            </button>
+          ))}
+          {actions?.map((a) => (
+            <button
+              key={a.label}
+              type="button"
+              role="menuitem"
+              onClick={() => {
+                a.onSelect();
+                setOpen(false);
+              }}
+              className="flex min-h-11 w-full items-center border-t border-neutral-200 px-4 text-left text-sm hover:bg-neutral-100 dark:border-neutral-700 dark:hover:bg-neutral-700"
+            >
+              {a.label}
             </button>
           ))}
         </div>

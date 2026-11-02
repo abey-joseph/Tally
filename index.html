@@ -3,8 +3,26 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#121212" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#ffffff" />
+    <script>
+      // Apply the saved theme before first paint (see src/theme.ts).
+      (function () {
+        var t = { theme: 'system', pureBlack: false };
+        try {
+          t = JSON.parse(localStorage.getItem('tally-theme')) || t;
+        } catch (e) {}
+        var dark =
+          t.theme === 'dark' ||
+          (t.theme === 'system' && matchMedia('(prefers-color-scheme: dark)').matches);
+        var root = document.documentElement;
+        if (dark) root.classList.add('dark');
+        if (dark && t.pureBlack) root.classList.add('black');
+        root.style.colorScheme = dark ? 'dark' : 'light';
+        document
+          .querySelector('meta[name="theme-color"]')
+          .setAttribute('content', dark ? (t.pureBlack ? '#000000' : '#171717') : '#ffffff');
+      })();
+    </script>
     <meta name="description" content="A minimal personal habit tracker." />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
