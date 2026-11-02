@@ -28,3 +28,21 @@ body {
 html.black body {
   background-color: #000;
 }
+
+@utility icon-btn {
+  @apply inline-flex h-11 w-11 items-center justify-center rounded-full text-neutral-700 transition-colors hover:bg-neutral-100 focus-visible:outline-2 focus-visible:outline-neutral-500 active:bg-neutral-200 dark:text-neutral-200 dark:hover:bg-neutral-800 dark:active:bg-neutral-700;
+}
+
+/* Habit colour: set --habit on a container, then use .habit-fg for icons/rings. */
+.habit-fg {
+  color: var(--habit);
+}
+.dark .habit-fg {
+  color: color-mix(in srgb, var(--habit) 65%, white);
+}
+.habit-tint {
+  background-color: color-mix(in srgb, var(--habit) 16%, transparent);
+}
+.dark .habit-tint {
+  background-color: color-mix(in srgb, var(--habit) 30%, transparent);
+}

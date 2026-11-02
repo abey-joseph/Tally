@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import WriteErrorToast from '../components/WriteErrorToast';
 import { DataProvider, useData } from '../data/DataProvider';
 import { useAuth } from './AuthProvider';
 import { ErrorScreen, LoadingScreen, NoAccessScreen, SignInScreen } from './screens';
@@ -26,5 +27,10 @@ function DataReady({ children }: { children: ReactNode }) {
   const { loading, error } = useData();
   if (error) return <ErrorScreen message={error} />;
   if (loading) return <LoadingScreen label="Loading your habits…" />;
-  return <>{children}</>;
+  return (
+    <>
+      {children}
+      <WriteErrorToast />
+    </>
+  );
 }

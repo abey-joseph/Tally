@@ -259,6 +259,10 @@ Charts are SVG, use the habit colour, and work at 360px width.
 - Rules: edit `firestore.rules.template`. `npm run rules` writes the git-ignored `firestore.rules` with the email from `.env.local`.
 - Emulator testing: `VITE_USE_EMULATORS=true` (dev server only) exposes `window.__tallyEmulatorSignIn(email, verified?)` because Google's popup script can't load in sandboxes.
 
+- Main list: `src/pages/HabitListPage.tsx` → `HabitRow` → `DayBox` / `ScoreRing`; numeric entry via `NumberSheet`. Pure UI helpers in `src/lib/` (`colors`, `cycle`, `format`, `sort`, `describe`).
+- Habit colour in the UI: set `--habit` on a container and use `.habit-fg` / `.habit-tint` (index.css). Dark mode lightens colours automatically; palette colours all have ≥ 3:1 contrast on white.
+- E2E testing recipe: emulators + dev server with `VITE_USE_EMULATORS=true`, seed via the Firestore emulator REST API with `Authorization: Bearer owner`.
+
 ### Logic decisions (agreed interpretations of the spec)
 
 - **Today, not yet entered** = status `missed` with `pending: true`. It does not lower the score or break the current streak until the day is over (the UI should show it as empty, not ✕).
@@ -267,4 +271,6 @@ Charts are SVG, use the habit colour, and work at 360px width.
 - **Numeric at-most**: an un-entered day counts as 0 → `autoDone` (faded tick) when the window total is within the limit.
 - **Entries before `startDate`** are shown with their status but never scored; empty days before start are `unknown`.
 - **Completions** (totals, weekday grid): Yes/No = days entered `'y'` (auto-ticks excluded); Measurable = days with value > 0. History bars for Measurable habits sum the values.
+- **Yes/No tap cycle**: not entered → done (`'y'`) → skipped (`'s'`) → cleared (entry removed). Clearing, rather than storing `'n'`, means the day shows ✕ or a faded auto-tick as appropriate and never blocks auto-ticks. Imported `'n'` values still display as ✕.
+- Habit names are in normal text colour (for contrast); the habit colour is on the ring, ticks and met-target pills.
 - `weekStart` is stored as a JS weekday number (0 = Sunday, 1 = Monday). Settings gained `pureBlack` and `newestFirst`.
