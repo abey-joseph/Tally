@@ -116,3 +116,35 @@ describe('describeDay', () => {
     ).toBe('Read, Monday 2 Nov: not entered yet');
   });
 });
+
+describe('describeSchedule', () => {
+  it('describes Yes/No and Measurable schedules', async () => {
+    const { describeSchedule } = await import('./describe');
+    expect(describeSchedule(makeHabit({ frequency: { kind: 'timesPerWeek', times: 3 } }))).toBe(
+      '3 times per week',
+    );
+    expect(describeSchedule(makeHabit({ type: 'numeric', unit: 'km', target: 5 }))).toBe(
+      'At least 5 km per day',
+    );
+    expect(
+      describeSchedule(
+        makeHabit({
+          type: 'numeric',
+          target: 2,
+          targetType: 'atMost',
+          frequency: { kind: 'everyNDays', n: 3 },
+        }),
+      ),
+    ).toBe('At most 2 every 3 days');
+    expect(
+      describeSchedule(
+        makeHabit({
+          type: 'numeric',
+          target: 10.5,
+          unit: 'pages',
+          frequency: { kind: 'timesPerWeek', times: 1 },
+        }),
+      ),
+    ).toBe('At least 10.5 pages per week');
+  });
+});

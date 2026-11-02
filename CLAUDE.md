@@ -261,6 +261,7 @@ Charts are SVG, use the habit colour, and work at 360px width.
 
 - Main list: `src/pages/HabitListPage.tsx` → `HabitRow` → `DayBox` / `ScoreRing`; numeric entry via `NumberSheet`. Pure UI helpers in `src/lib/` (`colors`, `cycle`, `format`, `sort`, `describe`).
 - Create/edit: `src/pages/HabitEditPage.tsx`; form state + validation in `src/lib/habitForm.ts` (tested). Shared `AppBar`, `ConfirmDialog`, `useGoBack`; CSS utilities `card`, `input`, `icon-btn` in index.css.
+- Detail: `src/pages/HabitDetailPage.tsx` with cards in `src/components/detail/` (Overview, ScoreChart, HistoryChart, CalendarCard, StreaksCard, FrequencyCard). Chart data shaping in `src/lib/charts.ts` (tested). Charts are hand-built SVG, scroll horizontally and open on the newest data. The calendar is a grid of buttons (40px cells) for accessibility.
 - Habit colour in the UI: set `--habit` on a container and use `.habit-fg` / `.habit-tint` (index.css). Dark mode lightens colours automatically; palette colours all have ≥ 3:1 contrast on white.
 - E2E testing recipe: emulators + dev server with `VITE_USE_EMULATORS=true`, seed via the Firestore emulator REST API with `Authorization: Bearer owner`.
 
@@ -276,5 +277,7 @@ Charts are SVG, use the habit colour, and work at 360px width.
 - **Measurable habits pick a period** (per day / week / month / every N days), not "X times per week": the target is an amount per period. Weekly/monthly are stored as `timesPerWeek`/`timesPerMonth` with `times: 1`.
 - **Habit type can't be changed** after creation (existing entries would no longer make sense).
 - **Start date** can be backdated but not set in the future. Target 0 is allowed only for "at most".
+- **Score chart** points = score on the last day of each day/week/month/quarter/year (default zoom: week). **History** default zoom: week.
+- **Calendar cells** differ by pattern, not only colour: done = solid, target met = tint, skipped = stripes, not done = grey, today-pending = dashed outline.
 - Habit names are in normal text colour (for contrast); the habit colour is on the ring, ticks and met-target pills.
 - `weekStart` is stored as a JS weekday number (0 = Sunday, 1 = Monday). Settings gained `pureBlack` and `newestFirst`.
