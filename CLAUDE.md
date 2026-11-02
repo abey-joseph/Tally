@@ -250,3 +250,15 @@ Charts are SVG, use the habit colour, and work at 360px width.
 - Path alias `@/` → `src/`.
 - Dark mode is a class on `<html>` (`dark`, plus `black` for pure black); Tailwind uses `@custom-variant dark`.
 - App icons: edit `assets/icon.svg` / `assets/icon-maskable.svg`, then run `scripts/generate-icons.mjs` (see header comment).
+- Core logic lives in `src/lib/` (pure, no React/Firebase): `dates`, `frequency`, `status` (timeline, 5.1 + 5.3), `score` (5.2), `streaks` (5.4), `stats` (5.5, plus `analyzeHabit`).
+- Dates are handled as `YYYY-MM-DD` strings / UTC day numbers; only `todayIn(timezone)` touches a real time zone.
+
+### Logic decisions (agreed interpretations of the spec)
+
+- **Today, not yet entered** = status `missed` with `pending: true`. It does not lower the score or break the current streak until the day is over (the UI should show it as empty, not ✕).
+- **Explicit "no" (`'n'`)** is never auto-ticked, even if the window target is met.
+- **Numeric at-least**: a day with an entered `0` inside a met window is `autoDone` (not `done`), since its own value isn't > 0.
+- **Numeric at-most**: an un-entered day counts as 0 → `autoDone` (faded tick) when the window total is within the limit.
+- **Entries before `startDate`** are shown with their status but never scored; empty days before start are `unknown`.
+- **Completions** (totals, weekday grid): Yes/No = days entered `'y'` (auto-ticks excluded); Measurable = days with value > 0. History bars for Measurable habits sum the values.
+- `weekStart` is stored as a JS weekday number (0 = Sunday, 1 = Monday). Settings gained `pureBlack` and `newestFirst`.
