@@ -89,14 +89,66 @@ npm run dev
 
 Open <http://localhost:5173> and sign in with your allowed Google account.
 
-## 9. Deploy the app (Stage 8)
+## 9. Deploy the app
+
+There are two ways to deploy. Both upload the app to Firebase Hosting **and** the database
+rules, and both stay on the free plan.
+
+### Option A: from your laptop
 
 ```bash
 npm run deploy    # = rules + build + firebase deploy --only hosting,firestore:rules
 ```
 
-The app is then at `https://<project-id>.web.app`. On iPhone, open it in Safari and tap
-**Share → Add to Home Screen**.
+### Option B: from your phone (GitHub Actions)
+
+This route needs no laptop. The workflow (`.github/workflows/deploy.yml`) **only runs when you start
+it by hand**, never on its own.
+
+**One-time setup (about 10 minutes):**
+
+1. **Create a deploy key in Google Cloud.**
+   1. Open <https://console.cloud.google.com/iam-admin/serviceaccounts?project=tally-habits>.
+   2. Tap **Create service account**. Name it `github-deploy`, then **Create and continue**.
+   3. Role: **Firebase Admin**. Then **Continue → Done**.
+   4. Open `github-deploy` → **Keys → Add key → Create new key → JSON → Create**. A `.json` file
+      downloads (on iPhone it goes to the Files app, under Downloads).
+2. **Copy the key's text.** Open the file in Files (it shows as text), then long-press →
+   **Select All → Copy**.
+3. **Add two GitHub secrets.**
+   1. In Safari open
+      `https://github.com/abey-joseph/Tally/settings/secrets/actions`. If the page is cramped, use
+      **aA → Request Desktop Website**.
+   2. Tap **New repository secret** and add these two:
+
+   | Name                       | Value                                     |
+   | -------------------------- | ----------------------------------------- |
+   | `FIREBASE_SERVICE_ACCOUNT` | the JSON text you copied                  |
+   | `ENV_LOCAL`                | the seven `VITE_…=` lines from step 4 + 6 |
+
+   After this, delete the downloaded `.json` file from your phone. GitHub keeps the secret
+   encrypted, and nobody can read it back, not even you.
+
+**Each time you want to deploy:**
+
+1. Open `https://github.com/abey-joseph/Tally/actions`, then **Deploy to Firebase → Run workflow**.
+2. Pick the branch, type `deploy` in the box, then **Run workflow**.
+3. Wait about 3 minutes for a green tick. If you get a red cross, open the run to see which step
+   failed. It runs lint and tests first, so a broken build never goes live.
+
+### After deploying
+
+The app is at **https://tally-habits.web.app** (`https://<project-id>.web.app`).
+
+1. On iPhone, open it in **Safari** (not Chrome; only Safari can install home-screen apps).
+2. Sign in with your Google account.
+3. Tap **Share → Add to Home Screen → Add**.
+
+Open it from the home-screen icon from then on. It opens full-screen, works offline, and syncs
+when you're back online. Open the same address on your laptop to use it there too.
+
+**Updates:** deploy again, either way. The installed app picks up the new version the next
+time it's opened, so close and reopen it if you want it right away.
 
 ---
 

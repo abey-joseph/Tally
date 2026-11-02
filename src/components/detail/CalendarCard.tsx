@@ -14,7 +14,7 @@ function cellClass(day: DayInfo, isToday: boolean): string {
   const ring = isToday ? ' ring-2 ring-neutral-900 dark:ring-neutral-100' : '';
   switch (day.status) {
     case 'done':
-      return `habit-bg font-semibold text-white${ring}`;
+      return `habit-bg-strong font-semibold text-white${ring}`;
     case 'autoDone':
       return `habit-tint${ring}`;
     case 'skipped':
@@ -22,7 +22,7 @@ function cellClass(day: DayInfo, isToday: boolean): string {
     case 'missed':
       return day.pending
         ? `border-2 border-dashed border-neutral-300 text-neutral-500 dark:border-neutral-600${ring}`
-        : `bg-neutral-100 text-neutral-500 dark:bg-neutral-800 dark:text-neutral-400${ring}`;
+        : `bg-neutral-100 text-neutral-600 dark:bg-neutral-800 dark:text-neutral-400${ring}`;
     default:
       return `text-neutral-400 dark:text-neutral-600${ring}`;
   }
@@ -37,7 +37,7 @@ export default function CalendarCard({
   habit: Habit;
   timeline: Timeline;
   weekStart: Weekday;
-  onTapDay: (date: DateStr) => void;
+  onTapDay: (date: DateStr, el: HTMLElement) => void;
 }) {
   const { today } = timeline;
   const weeks = useMemo(
@@ -79,7 +79,7 @@ export default function CalendarCard({
                       key={date}
                       type="button"
                       disabled={future}
-                      onClick={() => onTapDay(date)}
+                      onClick={(e) => onTapDay(date, e.currentTarget)}
                       aria-label={future ? undefined : describeDay(habit, day)}
                       aria-hidden={future || undefined}
                       tabIndex={future ? -1 : undefined}
@@ -99,7 +99,7 @@ export default function CalendarCard({
         className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-neutral-600 dark:text-neutral-300"
       >
         <li className="flex items-center gap-1.5">
-          <span className="habit-bg h-3 w-3 rounded-sm" /> Done
+          <span className="habit-bg-strong h-3 w-3 rounded-sm" /> Done
         </li>
         <li className="flex items-center gap-1.5">
           <span className="habit-tint h-3 w-3 rounded-sm" /> Target met

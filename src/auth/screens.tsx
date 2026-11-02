@@ -4,9 +4,9 @@ import { useAuth } from './AuthProvider';
 
 function Centered({ children }: { children: ReactNode }) {
   return (
-    <div className="flex min-h-dvh items-center justify-center px-6">
+    <main className="flex min-h-dvh items-center justify-center px-6">
       <div className="w-full max-w-sm text-center">{children}</div>
-    </div>
+    </main>
   );
 }
 

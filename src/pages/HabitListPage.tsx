@@ -12,7 +12,10 @@ import {
   SortIcon,
   SyncIcon,
 } from '../components/icons';
+import { useDocumentTitle } from '../components/useDocumentTitle';
 import { useData } from '../data/DataProvider';
+import { confettiBurst } from '../components/confetti';
+import { completesToday } from '../lib/celebrate';
 import { nextBooleanValue } from '../lib/cycle';
 import { addDays } from '../lib/dates';
 import { dayOfMonth, weekdayShort } from '../lib/format';
@@ -33,7 +36,10 @@ export default function HabitListPage() {
   const [params, setParams] = useSearchParams();
   const showArchived = params.get('archived') === '1';
   const reordering = params.get('reorder') === '1';
-  const [sheet, setSheet] = useState<{ habit: Habit; date: DateStr } | null>(null);
+  useDocumentTitle(reordering ? 'Reorder habits' : undefined);
+  const [sheet, setSheet] = useState<{ habit: Habit; date: DateStr; anchor: HTMLElement } | null>(
+    null,
+  );
 
   // Columns: the last `daysShown` days; newest on the left when `newestFirst` (like Loop).
   const dates = useMemo(() => {
@@ -57,14 +63,19 @@ export default function HabitListPage() {
   const archivedCount = habits.filter((h) => h.archived).length;
 
   const onTapDay = useCallback(
-    (habit: Habit, date: DateStr) => {
+    (habit: Habit, date: DateStr, anchor: HTMLElement) => {
       if (habit.type === 'numeric') {
-        setSheet({ habit, date });
+        setSheet({ habit, date, anchor });
         return;
       }
-      setEntry(habit.id, date, nextBooleanValue(entriesFor(habit.id).values[date]));
+      const values = entriesFor(habit.id).values;
+      const next = nextBooleanValue(values[date]);
+      setEntry(habit.id, date, next);
+      if (settings.confetti && completesToday(habit, values, date, next, today)) {
+        confettiBurst(anchor, habit.color);
+      }
     },
-    [entriesFor, setEntry],
+    [entriesFor, setEntry, settings.confetti, today],
   );
 
   return (
@@ -191,8 +202,13 @@ export default function HabitListPage() {
           note={entriesFor(sheet.habit.id).notes[sheet.date]}
           onClose={() => setSheet(null)}
           onSave={(value, note) => {
-            setEntry(sheet.habit.id, sheet.date, value, note);
+            const { habit, date, anchor } = sheet;
+            const values = entriesFor(habit.id).values;
+            setEntry(habit.id, date, value, note);
             setSheet(null);
+            if (settings.confetti && completesToday(habit, values, date, value, today)) {
+              confettiBurst(anchor, habit.color);
+            }
           }}
         />
       )}

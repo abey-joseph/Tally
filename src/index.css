@@ -61,6 +61,10 @@ html.black body {
 .habit-bg {
   background-color: var(--habit);
 }
+/* Deeper shade for cells with white text: ≥ 4.5:1 for every palette colour. */
+.habit-bg-strong {
+  background-color: color-mix(in srgb, var(--habit) 78%, black);
+}
 .cal-skip {
   background-image: repeating-linear-gradient(135deg, rgb(0 0 0 / 0.12) 0 2px, transparent 2px 6px);
 }
@@ -70,4 +74,16 @@ html.black body {
     rgb(255 255 255 / 0.16) 0 2px,
     transparent 2px 6px
   );
+}
+
+/* Respect the iPhone's "Reduce Motion" setting. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

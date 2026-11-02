@@ -265,6 +265,8 @@ Charts are SVG, use the habit colour, and work at 360px width.
 - Settings: `src/pages/SettingsPage.tsx`. Theme: `src/theme.ts` (`useTheme`, called in AuthGate) plus an inline script in `index.html` that applies the cached theme before first paint.
 - Export/import: `src/lib/backup.ts` (CSV, JSON backup v1, `parseBackup`, `planImport` dry run, `importWrites`), tested including a full round trip. Files are saved via `src/lib/download.ts` (share sheet on iPhone, download elsewhere). `DataProvider.importData` writes in batches.
 - Reorder: "Reorder…" in the sort menu → `?reorder=1` → `src/components/ReorderList.tsx` (drag handle with `touch-action: none`, plus up/down buttons).
+- Polish (Stage 8): confetti in `src/components/confetti.ts` (triggered via `lib/celebrate.ts → completesToday`, skipped for Reduce Motion), `ErrorBoundary`, per-screen tab titles (`useDocumentTitle`), global reduced-motion CSS. Calendar "done" cells use `.habit-bg-strong` (deepened colour, ≥ 4.5:1 for white text).
+- Deploy: `npm run deploy` (laptop) or the manual-only GitHub workflow `.github/workflows/deploy.yml` (secrets `ENV_LOCAL`, `FIREBASE_SERVICE_ACCOUNT`). Steps in `scripts/setup.md` §9.
 - Habit colour in the UI: set `--habit` on a container and use `.habit-fg` / `.habit-tint` (index.css). Dark mode lightens colours automatically; palette colours all have ≥ 3:1 contrast on white.
 - E2E testing recipe: emulators + dev server with `VITE_USE_EMULATORS=true`, seed via the Firestore emulator REST API with `Authorization: Bearer owner`.
 

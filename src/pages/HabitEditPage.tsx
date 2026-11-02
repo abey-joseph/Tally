@@ -283,9 +283,7 @@ function HabitFormView({ habit, newType }: { habit?: Habit; newType?: HabitType 
               <TrashIcon size={20} />
               <span>
                 Delete habit
-                <span className="block text-sm opacity-80">
-                  Removes the habit and all its history.
-                </span>
+                <span className="block text-sm">Removes the habit and all its history.</span>
               </span>
             </button>
           </section>

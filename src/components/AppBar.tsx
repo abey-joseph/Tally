@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { BackIcon } from './icons';
+import { useDocumentTitle } from './useDocumentTitle';
 import { useGoBack } from './useGoBack';
 
 interface AppBarProps {
@@ -12,6 +13,7 @@ interface AppBarProps {
 /** Sticky top bar with a back button, title and optional actions. */
 export default function AppBar({ title, backTo = '/', actions }: AppBarProps) {
   const goBack = useGoBack(backTo);
+  useDocumentTitle(typeof title === 'string' ? title : undefined);
   return (
     <header className="sticky top-0 z-30 bg-white/95 backdrop-blur dark:bg-neutral-900/95 [html.black_&]:bg-black/95">
       <div className="mx-auto flex h-14 w-full max-w-[720px] items-center gap-1 px-2">

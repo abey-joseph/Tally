@@ -10,7 +10,7 @@ interface HabitRowProps {
   score: number;
   timeline: Timeline;
   dates: DateStr[];
-  onTapDay: (habit: Habit, date: DateStr) => void;
+  onTapDay: (habit: Habit, date: DateStr, el: HTMLElement) => void;
 }
 
 function HabitRow({ habit, score, timeline, dates, onTapDay }: HabitRowProps) {
@@ -37,7 +37,7 @@ function HabitRow({ habit, score, timeline, dates, onTapDay }: HabitRowProps) {
             key={date}
             habit={habit}
             day={dayInfo(timeline, date)}
-            onTap={() => onTapDay(habit, date)}
+            onTap={(el) => onTapDay(habit, date, el)}
           />
         ))}
       </div>

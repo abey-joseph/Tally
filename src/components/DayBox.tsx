@@ -8,7 +8,7 @@ import { CheckIcon, CrossIcon, DashIcon } from './icons';
 interface DayBoxProps {
   habit: Habit;
   day: DayInfo;
-  onTap: () => void;
+  onTap: (el: HTMLElement) => void;
 }
 
 /** One tappable day cell. Status is shown by icon *and* colour. */
@@ -39,7 +39,7 @@ export default function DayBox({ habit, day, onTap }: DayBoxProps) {
   return (
     <button
       type="button"
-      onClick={onTap}
+      onClick={(e) => onTap(e.currentTarget)}
       aria-label={describeDay(habit, day)}
       className="flex h-12 w-11 shrink-0 items-center justify-center rounded-lg transition-colors hover:bg-neutral-100 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-neutral-500 active:bg-neutral-200 dark:hover:bg-neutral-800 dark:active:bg-neutral-700"
     >

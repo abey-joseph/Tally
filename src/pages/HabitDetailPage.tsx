@@ -8,8 +8,10 @@ import OverviewCard from '../components/detail/OverviewCard';
 import ScoreChart from '../components/detail/ScoreChart';
 import StreaksCard from '../components/detail/StreaksCard';
 import { EditIcon } from '../components/icons';
+import { confettiBurst } from '../components/confetti';
 import NumberSheet from '../components/NumberSheet';
 import { useData } from '../data/DataProvider';
+import { completesToday } from '../lib/celebrate';
 import { nextBooleanValue } from '../lib/cycle';
 import { isEditable } from '../lib/dates';
 import { describeSchedule } from '../lib/describe';
@@ -22,7 +24,8 @@ export default function HabitDetailPage() {
   const { habits, entriesFor, today, settings, setEntry } = useData();
   const habit = habits.find((h) => h.id === id);
   const entries = habit ? entriesFor(habit.id) : null;
-  const [sheetDate, setSheetDate] = useState<DateStr | null>(null);
+  const [sheet, setSheet] = useState<{ date: DateStr; anchor: HTMLElement } | null>(null);
+  const sheetDate = sheet?.date ?? null;
 
   const analysis = useMemo(
     () => (habit && entries ? analyzeHabit(habit, entries.values, today) : null),
@@ -34,12 +37,19 @@ export default function HabitDetailPage() {
   );
 
   const onTapDay = useCallback(
-    (date: DateStr) => {
+    (date: DateStr, anchor: HTMLElement) => {
       if (!habit || !entries || !isEditable(date, today)) return;
-      if (habit.type === 'numeric') setSheetDate(date);
-      else setEntry(habit.id, date, nextBooleanValue(entries.values[date]));
+      if (habit.type === 'numeric') {
+        setSheet({ date, anchor });
+        return;
+      }
+      const next = nextBooleanValue(entries.values[date]);
+      setEntry(habit.id, date, next);
+      if (settings.confetti && completesToday(habit, entries.values, date, next, today)) {
+        confettiBurst(anchor, habit.color);
+      }
     },
-    [habit, entries, today, setEntry],
+    [habit, entries, today, setEntry, settings.confetti],
   );
 
   if (!habit || !entries || !analysis || !overview) {
@@ -95,16 +105,22 @@ export default function HabitDetailPage() {
         <FrequencyCard habit={habit} timeline={analysis.timeline} weekStart={settings.weekStart} />
       </main>
 
-      {sheetDate && (
+      {sheet && sheetDate && (
         <NumberSheet
           habit={habit}
           date={sheetDate}
           value={entries.values[sheetDate]}
           note={entries.notes[sheetDate]}
-          onClose={() => setSheetDate(null)}
+          onClose={() => setSheet(null)}
           onSave={(value, note) => {
             setEntry(habit.id, sheetDate, value, note);
-            setSheetDate(null);
+            setSheet(null);
+            if (
+              settings.confetti &&
+              completesToday(habit, entries.values, sheetDate, value, today)
+            ) {
+              confettiBurst(sheet.anchor, habit.color);
+            }
           }}
         />
       )}
