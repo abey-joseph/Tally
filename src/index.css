@@ -46,3 +46,15 @@ html.black body {
 .dark .habit-tint {
   background-color: color-mix(in srgb, var(--habit) 30%, transparent);
 }
+
+@utility card {
+  @apply rounded-2xl border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900;
+  html.black & {
+    @apply bg-black;
+  }
+}
+
+/* 16px text so iOS Safari doesn't zoom in when a field is focused. */
+@utility input {
+  @apply h-11 w-full rounded-xl border border-neutral-300 bg-transparent px-3 text-base outline-none placeholder:text-neutral-400 focus:border-neutral-600 aria-invalid:border-red-600 dark:border-neutral-700 dark:placeholder:text-neutral-500 dark:focus:border-neutral-400 dark:aria-invalid:border-red-400;
+}
