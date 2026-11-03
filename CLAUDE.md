@@ -254,6 +254,7 @@ Charts are SVG, use the habit colour, and work at 360px width.
 - Dates are handled as `YYYY-MM-DD` strings / UTC day numbers; only `todayIn(timezone)` touches a real time zone.
 
 - Firebase: `src/firebase/config.ts` (init from env, offline cache, emulators in dev only), `src/firebase/auth.ts` (popup, or redirect in the installed app).
+- Auth uses `initializeAuth` **without** a popup/redirect resolver (not `getAuth`): on iPhone the resolver loads Google's gapi script + iframe before reporting the user, which blocked start-up for 30s+ on weak connections. `browserPopupRedirectResolver` is passed only to the sign-in / `getRedirectResult` calls.
 - Data: `src/data/DataProvider.tsx` holds three live listeners (user doc, habits, entries) plus write actions (`useData()`). Writes are never awaited; Firestore's local cache makes them instant and they sync later. `src/data/model.ts` validates every document read.
 - Auth gate: `src/auth/AuthGate.tsx` shows the loading, sign-in, No access or app screen. The data listeners only start for the allowed user.
 - Rules: edit `firestore.rules.template`. `npm run rules` writes the git-ignored `firestore.rules` with the email from `.env.local`.

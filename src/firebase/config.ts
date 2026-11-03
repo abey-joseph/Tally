@@ -5,9 +5,11 @@
  */
 import { initializeApp, type FirebaseApp } from 'firebase/app';
 import {
+  browserLocalPersistence,
   connectAuthEmulator,
-  getAuth,
   GoogleAuthProvider,
+  indexedDBLocalPersistence,
+  initializeAuth,
   signInWithCredential,
   type Auth,
 } from 'firebase/auth';
@@ -74,7 +76,13 @@ export function getFirebase(): FirebaseHandles {
     throw new Error(`Firebase is not configured. Missing: ${missingConfig.join(', ')}`);
   }
   const app = initializeApp(config);
-  const auth = getAuth(app);
+  // Deliberately NOT getAuth(): that also installs the popup/redirect helper, which on
+  // iPhone loads Google's gapi script + a hidden iframe *before* reporting who is signed in.
+  // On a weak connection that blocked startup for 30s+. The helper is passed only to the
+  // sign-in calls instead (see auth.ts), so opening the app needs no extra network step.
+  const auth = initializeAuth(app, {
+    persistence: [indexedDBLocalPersistence, browserLocalPersistence],
+  });
   // Offline persistence (IndexedDB), shared safely across multiple open tabs.
   const db = initializeFirestore(app, {
     localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }),

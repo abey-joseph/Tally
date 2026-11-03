@@ -1,7 +1,13 @@
-import { getRedirectResult, onAuthStateChanged, type User } from 'firebase/auth';
+import { onAuthStateChanged, type User } from 'firebase/auth';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
-import { isAllowedEmail, signInWithGoogle, signOut } from '../firebase/auth';
+import {
+  completeRedirectSignIn,
+  isAllowedEmail,
+  isRedirectPending,
+  signInWithGoogle,
+  signOut,
+} from '../firebase/auth';
 import { ALLOWED_EMAIL, getFirebase } from '../firebase/config';
 
 export type AuthState =
@@ -32,20 +38,28 @@ function describeAuthError(err: unknown): string {
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [state, setState] = useState<AuthState>({ status: 'loading' });
+  /** `undefined` until Firebase has read the saved sign-in from this device. */
+  const [user, setUser] = useState<User | null | undefined>(undefined);
+  /** True while returning from a redirect sign-in (installed iPhone app). */
+  const [redirecting, setRedirecting] = useState(isRedirectPending);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const { auth } = getFirebase();
-    // Surface errors from a redirect sign-in (installed iPhone app).
-    getRedirectResult(auth).catch((err: unknown) => setError(describeAuthError(err)));
-    return onAuthStateChanged(auth, (user) => {
-      if (!user) setState({ status: 'signedOut' });
-      else if (user.emailVerified && isAllowedEmail(user.email, ALLOWED_EMAIL))
-        setState({ status: 'signedIn', user });
-      else setState({ status: 'denied', user });
-    });
+    // Finish a redirect sign-in, surfacing any error. A no-op when none is pending.
+    completeRedirectSignIn()
+      .catch((err: unknown) => setError(describeAuthError(err)))
+      .finally(() => setRedirecting(false));
+    return onAuthStateChanged(auth, setUser);
   }, []);
+
+  const state = useMemo<AuthState>(() => {
+    if (user === undefined || (redirecting && !user)) return { status: 'loading' };
+    if (!user) return { status: 'signedOut' };
+    if (user.emailVerified && isAllowedEmail(user.email, ALLOWED_EMAIL))
+      return { status: 'signedIn', user };
+    return { status: 'denied', user };
+  }, [user, redirecting]);
 
   const signIn = useCallback(async () => {
     setError(null);
