@@ -70,15 +70,18 @@ This one value is used in two places:
 ## 7. Link the CLI and deploy the rules
 
 ```bash
-npm install -g firebase-tools        # once
-firebase login
+npx firebase-tools@15 login          # once
 ```
+
+Use `npx firebase-tools@15 …` rather than a globally installed `firebase`: it always fetches the
+right build for your Mac (an old standalone Intel binary fails on Apple Silicon with
+"Bad CPU type in executable"). `npm run deploy` already does this.
 
 `.firebaserc` already points at `tally-habits` (change it if you use a different project). Then:
 
 ```bash
 npm run rules                        # generates firestore.rules
-firebase deploy --only firestore:rules
+npx firebase-tools@15 deploy --only firestore:rules
 ```
 
 ## 8. Run it
@@ -97,7 +100,7 @@ rules, and both stay on the free plan.
 ### Option A: from your laptop
 
 ```bash
-npm run deploy    # = rules + build + firebase deploy --only hosting,firestore:rules
+npm run deploy    # = rules + build + firebase-tools deploy (via npx) --only hosting,firestore:rules
 ```
 
 ### Option B: from your phone (GitHub Actions)

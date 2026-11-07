@@ -14,7 +14,7 @@
     "test:watch": "vitest",
     "typecheck": "tsc -b",
     "rules": "node scripts/generate-rules.mjs",
-    "deploy": "npm run rules && npm run build && firebase deploy --only hosting,firestore:rules"
+    "deploy": "npm run rules && npm run build && npx --yes firebase-tools@15 deploy --only hosting,firestore:rules"
   },
   "dependencies": {
     "date-fns": "^4.4.0",
